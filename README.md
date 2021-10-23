@@ -1,3 +1,4 @@
+
 ## Evaluacion de distintos tratamientos y su interacción.
 #### Autor
 Gustavo Bustos.
@@ -5,3 +6,5 @@ Gustavo Bustos.
 
 # Descripción del problema 
 Inspección datos
+
+# GIB
