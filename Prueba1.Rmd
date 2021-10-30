@@ -1,28 +1,123 @@
 ---
-title: "Untitled"
-output: pdf_document
+title: "Evaluacion del comportamiento de una vacuna en centros de mar."
+author: "Gustavo Bustos Yáñez"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r, message=FALSE}
+library(ggplot2)
+library(readxl)
+library(stats)
+library(graphics)
+library(pander)
+library(MASS)
+library(dplyr)
+library(knitr)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+datos <- read_excel("datasetGB.xls")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Exploración de datos.
+
+```{r} 
+# Transformaciópn de variables
+datos$Vacuna<-as.factor(datos$Vacuna)
+datos$Tratamiento<-as.factor(datos$Tratamiento)
+datos$Fecha<-as.factor(datos$Fecha)
+```
+
+EL set de datos se compone de un data frame conformado por 6 columnas y 6.711 observaciones. De los cuales, 2 columnas corresponden a los tratamientos a analizar, identificados como Tratamiento y Vacuna.
+```{r}
+# Estructura del dataset
+str(datos)
+```
+
+
+### Histograma
+
+
+
+```{r}
+ggplot(datos, aes(x =Mortalidad)) +
+geom_histogram(binwidth=30, aes(fill=..count..), col='black', bins = 8) + #bins ajusta el número de clases
+  ggtitle("Histograma mortalidad") 
+```
+Para ayudar a la visualización del histograma se eliminan los datos en 0, que representan días sin extracción de mortalidad con características que indican la presencia de la patología en los ejemplares extraídos en la mortalidad.
+
+```{r}
+#Histograma excluyendo datos en 0
+Mort_1<-filter(datos, Mortalidad > 1)
+ggplot(Mort_1, aes(x =Mortalidad)) +
+geom_histogram(binwidth=50, aes(fill=..count..), col='black') +
+  ggtitle("Histograma mortalidad excluyendo días sin mortalidad")
+```
+
+El histograma demuestra que la distribución de los datos no evidencia que sea del tipo normal.
+
+
+
+
+
+
+
+
+### Tabla de frecuencias:
+
+
+```{r}
+Tablaestrategia <-table(datos$Tratamiento, datos$Vacuna)
+knitr::kable(Tablaestrategia, caption = "Frecuencias variables Tratamiento y Vacuna.")
+```
+La tabla de frecuencias demuestra que los datos no se encuentran balanceados, esto puede deberse a que existen unidades con más tiempo de producción que otras y menor cantidad de unidades
+solamente con el tratamiento.
+
+#### Establece relaciÃ³n entre variables cuantitativas y factores usando grÃ¡ficas de correlaciÃ³n, boxplot, interacciÃ³n o de tamaÃ±o de los efectos (4 puntos).
+
+```{r}
+geom_point()
+```
+
+
+```{r}
+# Tamaño de los efectos
+plot.design(datos$Mortalidad ~ datos$Tratamiento * datos$Vacuna, xlab = "Factores", ylab="Mortalidad", col="darkgreen")
+```
+
+
+```{r}
+#Gráfico de interacción.
+interaction.plot(datos$Vacuna, datos$Tratamiento, datos$Mortalidad, fun = mean, xlab = "Tratamiento", ylab = "Mortalidad", col=1:2, trace.label="Vacuna", pch = c(15, 16), type = "b")
+```
+
+### Identifica si existen errores, datos faltantes o valores atÃ­picos (4 puntos).
+
+
+
+
+#### Resume los datos usando tablas y estadÃ­stica descriptiva (4 puntos).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
