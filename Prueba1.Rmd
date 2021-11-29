@@ -1,0 +1,148 @@
+---
+title: "Evaluacion de la mortalidad de dos tratamientos en centros de mar y su interacción."
+author: "Gustavo Bustos Yáñez"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, message=FALSE}
+library(ggplot2)
+library(readxl)
+library(stats)
+library(graphics)
+library(pander)
+library(MASS)
+library(dplyr)
+library(knitr)
+library(psych)
+```
+
+```{r}
+datos <- read_excel("datasetGB.xls")
+```
+
+## Exploración de datos.
+
+```{r} 
+# Transformaciópn de variables
+datos$Vacuna<-as.factor(datos$Vacuna)
+datos$Tratamiento<-as.factor(datos$Tratamiento)
+datos$Fecha<-as.factor(datos$Fecha)
+```
+
+Estructura del set de datos.
+
+```{r}
+str(datos)
+```
+
+
+### Histograma
+
+```{r}
+ggplot(datos, aes(x =Mortalidad)) +
+geom_histogram(binwidth=30, aes(fill=..count..), col='black', bins = 8) + #bins ajusta el número de clases
+  ggtitle("Histograma mortalidad") 
+```
+
+
+Para ayudar a la visualización del histograma se eliminan los datos en 0, que representan días sin extracción de mortalidad con características que indican la presencia de la patología en los ejemplares extraídos en la mortalidad.
+
+
+
+
+```{r}
+#Histograma excluyendo datos en 0
+Mort_1<-filter(datos, Mortalidad > 1)
+ggplot(Mort_1, aes(x =Mortalidad)) +
+geom_histogram(binwidth=50, aes(fill=..count..), col='black') +
+  ggtitle("Histograma mortalidad excluyendo días sin mortalidad")
+```
+
+
+El histograma demuestra que la distribución de los datos no evidencia que sea del tipo normal.
+
+### Tabla de frecuencias:
+
+
+```{r}
+Tablaestrategia <-table(datos$Tratamiento, datos$Vacuna)
+knitr::kable(Tablaestrategia, col.names=c("Sin Vacuna", "Con Vacuna"), escape=FALSE, caption = "\\ Frecuencias variables Tratamiento y Vacuna.")
+```
+
+
+
+```{r}
+Tablaestrategiasin0 <-table(Mort_1$Tratamiento, Mort_1$Vacuna)
+knitr::kable(Tablaestrategiasin0, col.names=c("Sin Vacuna", "Con Vacuna"), escape=FALSE, caption = "Frecuencias variables Tratamiento y Vacuna en días con mortalidad.")
+```
+
+
+Las tablas de frecuencias demuestran que los datos no se encuentran balanceados, esto puede deberse a que existen unidades con más tiempo de producción que otras y menor cantidad de unidades
+solamente con el tratamiento.
+
+
+### Relación entre variables.
+
+### Tamaño de los efectos.
+
+```{r}
+# Tamaño de los efectos
+plot.design(datos$Mortalidad ~ datos$Tratamiento * datos$Vacuna, xlab = "Factores", ylab="Mortalidad", col="darkgreen")
+```
+
+En la gráfica se puede inferir que el grupo sin tratamiento posee mayor impacto sobre la mortalidad, seguido del grupo sin vacuna.
+
+
+### Gráfico de interacción.
+
+
+
+```{r}
+#Gráfico de interacción.
+interaction.plot(datos$Tratamiento, datos$Vacuna, datos$Mortalidad, fun = mean, xlab = "Tratamiento", ylab = "Mortalidad", col=1:2, trace.label= "Vacuna", pch = c(15, 16), type = "b")
+```
+
+No existe interacción entre las variables.
+
+
+
+
+## Resumen.
+
+
+```{r}
+Tratamiento<-datos$Mortalidad
+Vacuna<-datos$Vacuna
+```
+
+
+```{r}
+vacuna<- datos %>% group_by(Vacuna) %>% summarise(varianza = var(Mortalidad), promedio = mean(Mortalidad), máximo = max(Mortalidad), mínimo = min(Mortalidad))
+tratamiento<-datos %>% group_by(Tratamiento) %>% summarise(varianza = var(Mortalidad), promedio = mean(Mortalidad), máximo = max(Mortalidad), mínimo = min(Mortalidad))
+tabla_resumen<-c(vacuna,tratamiento)
+matriz<-as.matrix(tabla_resumen)
+```
+
+
+```{r}
+resumen<-as.data.frame(tabla_resumen)
+knitr::kable(tratamiento, caption = "Resumen variable Tratamiento")
+knitr::kable(vacuna, caption = "Resumen variable Vacuna")
+```
+
+```{r}
+pairs.panels(datos[,4:6], method = "pearson", hist.col = "red",  density = TRUE, font=2)
+```
+
+Para ambos factores se obtiene una baja correlación en relación a la mortalidad, en el caso de Tratamiento la correlación es de tipo negativa.
+
+
+
+
+
