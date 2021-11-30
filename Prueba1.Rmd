@@ -33,15 +33,13 @@ library(car)
 library(nlme)
 library(lme4)
 library(multcomp)
-library(survival)
-library(survminer)
 ```
 
 ```{r}
 datos <- read_excel("datasetGB.xls")
 ```
 
-## Exploración de datos.
+# _Exploración de datos._
 
 ```{r} 
 # Transformaciópn de variables
@@ -54,13 +52,15 @@ datos$densidad<-as.factor(datos$densidad)
 ```
 
 La estructura del set de datos se compone por 5182 obvervaciones, que corresponden a los días que pasaron las unidades de cultivo en producción.
+Los datos de mortalidad se encuentran en número total y porcentaje de peces extraídos por unidad el día, los cuales cursan con signología característica de SRS y son clasificados como tal causa.
+
 
 ```{r}
 str(datos)
 ```
 
 
-### Histograma
+# _Histogramas._
 
 ```{r}
 ggplot(datos, aes(x =mortalidad_numero)) +
@@ -69,7 +69,7 @@ geom_histogram(binwidth=30, aes(fill=..count..), col='black', bins = 8) + #bins 
 ```
 
 
-Para ayudar a la visualización del histograma se eliminan los datos en 0, que representan días sin extracción de mortalidad con características que indican la presencia de la patología en los ejemplares extraídos en la mortalidad.
+Para intentar ayudar a la visualización del histograma, se eliminan los datos en 0 que representan días sin extracción de mortalidad con características que indican la presencia de la patología en los ejemplares extraídos en la mortalidad.
 
 
 
@@ -83,9 +83,9 @@ geom_histogram(binwidth=50, aes(fill=..count..), col='black') +
 ```
 
 
-El histograma demuestra que la distribución de los datos no evidencia que sea del tipo normal.
+El histograma demuestra que la distribución de los datos no presenta una distribución del tipo normal.
 
-### Tabla de frecuencias:
+# _Tablas de frecuencias._
 
 
 ```{r}
@@ -102,40 +102,35 @@ knitr::kable(Tablaestrategiasin0, col.names=c("Sin Vacuna", "Con Vacuna"), escap
 
 ```{r}
 Tablaclases <-table(datos$clase)
-knitr::kable(Tablaclases, col.names=c("Clase", "Frecuencia"), escape=FALSE, caption = "\\ Frecuencia clase.")
+knitr::kable(Tablaclases, col.names=c("Clase", "Frecuencia"), escape=FALSE, caption = "\\ Frecuencia de datos según clase.")
 ```
 
 ```{r}
 Tablaorigen <-table(datos$origen)
-knitr::kable(Tablaorigen, col.names=c("Origen", "Frecuencia"), escape=FALSE, caption = "\\ Frecuencia según origen de los peces.")
+knitr::kable(Tablaorigen, col.names=c("Origen", "Frecuencia"), escape=FALSE, caption = "\\ Frecuencia según el origen de los peces.")
 ```
 
 
 
 
-Las tablas de frecuencias demuestran que los datos no se encuentran balanceados, esto puede deberse a que existen unidades con más tiempo de producción que otras y menor cantidad de unidades
-solamente con el tratamiento. En el caso de clases y Origen se debe a la distinta proporción de peces sembrados en el sitio.
+Las tablas de frecuencias demuestran que los datos no se encuentran balanceados. Esto puede deberse a que existen unidades con distinta proporción de peces sembrados con características que presentan desde su origen (piscicultura, tratamiento, vacuna, clase).
 
 
-### Relación entre variables.
+# _Relación entre variables._
 
-### Tamaño de los efectos.
 
 ```{r}
 # Tamaño de los efectos
-plot.design(datos$mortalidad_numero ~ datos$tratamiento * datos$vacuna, xlab = "Factores", ylab="Mortalidad", col="darkgreen")
+plot.design(datos$mortalidad_numero ~ datos$tratamiento * datos$vacuna, xlab = "Factores", ylab="Mortalidad", col="darkgreen", main="Tamaño de los efectos") 
 ```
 
-En la gráfica se puede inferir que el grupo sin tratamiento posee mayor impacto sobre la mortalidad, seguido del grupo sin vacuna.
-
-
-### Gráfico de interacción.
+En la gráfica se puede inferir que el grupo sin tratamiento posee mayor impacto sobre la mortalidad.
 
 
 
 ```{r}
 #Gráfico de interacción.
-interaction.plot(datos$vacuna, datos$tratamiento, datos$mortalidad_numero, fun = mean, xlab = "Tratamiento", ylab = "Mortalidad", col=1:2, trace.label= "Vacuna", pch = c(15, 16), type = "b")
+interaction.plot(datos$vacuna, datos$tratamiento, datos$mortalidad_numero, fun = mean, xlab = "Tratamiento", ylab = "Mortalidad", col=1:2, trace.label= "Vacuna", pch = c(15, 16), type = "b", main="Gráfico de interacción")
 ```
 
 No existe interacción entre las variables tratamiento y vacuna.
@@ -143,7 +138,7 @@ No existe interacción entre las variables tratamiento y vacuna.
 
 
 
-## Resumen.
+# _Resumen set de datos._
 
 
 ```{r}
@@ -166,9 +161,15 @@ matriz<-as.matrix(tabla_resumen)
 resumen<-as.data.frame(tabla_resumen)
 knitr::kable(tratamiento, caption = "Resumen variable Tratamiento")
 knitr::kable(vacuna, caption = "Resumen variable Vacuna")
+```
+\pagebreak
+```{r}
 knitr::kable(clase, caption = "Resumen variable Clase")
 knitr::kable(origen, caption = "Resumen variable Origen")
 ```
+
+
+
 
 En el set de datos existe un gran número de obsevaciones en 0, lo que represneta los días en que no se extrajo mortalidad con características que indiquen la presnecia de la patología en los peces extraídos ese día.
 Existe además, un valor máximo de 1567 que se escapa de los valoires registrados regularmente en los días de cultivo, que puede ser considerado como dato atípico.
@@ -177,30 +178,43 @@ Existe además, un valor máximo de 1567 que se escapa de los valoires registrad
 
 
 
+
+
+
 ```{r}
-pairs.panels(datos[,3:8], method = "spearman", hist.col = "red",  density = TRUE, font=2)
+pairs.panels(datos[,3:8], method = "spearman", hist.col = "red",  density = TRUE, font=2, main="Correlación entre variables")
 ```
+
+
+
 
 El factor densidad es el que presenta una mayor correlación con respecto a la mortalidad, sin embargo, esta no es muy elevada. El resto de variables presentan una baja correlación, en el caso de tratamiento, esta es de tipo negativa.
 
 
 
-# Análisis estadístico
+# _Análisis estadístico._
+
 
 
 Para el análisis de regresión lineal se emplearán los datos de porcentaje de mortalidad, producto que el utilizar el número de peces muertos al día genera un error estándar mayor que el emplear el porcentaje.
 
 
+
+
 ## Modelo lineal general.
+
+
 
 ```{r}
 MLG <- lm(mortalidad_porcentaje ~ tratamiento + vacuna + tratamiento:vacuna, data = datos)
 
-pander::pander(summary(mod.1), caption = "Modelo de efectos fijos con interacción")
+pander::pander(summary(MLG), caption = "Modelo de efectos fijos con interacción")
 ```
 
 
-## Modelo lineal mixto
+## Modelo lineal mixto.
+
+
 
 ```{r}
 MLM <- lmer(mortalidad_porcentaje ~ tratamiento + vacuna + tratamiento:vacuna + (origen | densidad ), data = datos)
@@ -208,7 +222,7 @@ summary(MLM)
 ```
 
 
-## Comparación de modelos
+## Comparación de modelos.
 
 ```{r}
 pander::pander(AIC(MLG, MLM), caption = "Comparación de modelos sin transformación")
@@ -218,7 +232,7 @@ pander::pander(AIC(MLG, MLM), caption = "Comparación de modelos sin transformac
 
 
 
-Con efecto de linealizar se realiza una transformación en base a logaritmo de la variable respuesta. Los valores en 0 se reemplazan por un valor de 0.000001
+Con efecto de linealizar, se realiza una transformación del porcentaje de mortalidad diario utilizando logaritmo de la variable. Los valores en 0 se reemplazan por un valor de 0.000001 para entregar datos positivos.
 
 
 
@@ -232,19 +246,19 @@ datos <- datos %>% mutate(logmortalidad = ifelse(logmortalidad == "-Inf",0.00000
 
 
 
-## Modelo lineal general 
+## Modelo lineal general con datos transformados. 
 
 ```{r}
 logMLG <- lm(logmortalidad ~ tratamiento + vacuna + tratamiento:vacuna, data = datos)
 
-pander::pander(summary(mod.1transformado), caption = "Modelo de efectos fijos con interacción posterior a la transformacion de la variable respuesta")
+pander::pander(summary(logMLG), caption = "Modelo de efectos fijos con interacción posterior a la transformacion de la variable respuesta")
 ```
 
 
 
 
 
-## Modelo lineal mixto 
+## Modelo lineal mixto con datos transformados.
 
 
 ```{r}
@@ -253,7 +267,7 @@ summary(logMLM)
 ```
 
 
-## Comparación de modelos
+## Comparación de modelos.
 
 
 
@@ -262,17 +276,17 @@ pander::pander(AIC(logMLG, logMLM), caption = "Comparación de modelos posterior
 
 ```
 
-Al comparar los datos sin tranformar y luego de realizar el tratamiento mediante logaritmo, se obtiene una mejora del coeficiente AIC.
-Una vez realizada la transformación de los datos, se obtiene que la información aportada al modelo lineal mixto (logMLM), no mejora el modelo, teniendo un mejor coeficiente AIC el modelo lineal general (logMLG).
-
-
-
+# _Conclusión._
 
 ```{r}
 pander::pander(AIC(MLG, MLM, logMLG, logMLM), caption = "Comparación de modelos previo y posterior a la transformación")
 ```
 
+Al comparar los datos sin tranformar y luego de realizar el tratamiento mediante logaritmo, se obtiene una mejora del coeficiente AIC.
 
+Una vez realizada la transformación de los datos, se obtiene que la información aportada al modelo lineal mixto (logMLM), no mejora el modelo, teniendo un mejor coeficiente AIC el modelo lineal general (logMLG), el cual no incluye los efectos del origen ni densidad.
+
+Con los datos del modelo lineal general una vez transformados (logMLG) podemos inferir que tanto la vacunación como el tratamiento en agua dulce infieren en la mortalidad por causa SRS.
 
 
 
