@@ -13,5 +13,4 @@ Con el fin de disminuir el impacto en la producción y los consumos de antibiót
 
 Se realiza un análisis de comportamiento de la mortalidad por causa SRS , con el fin de evaluar el impacto sobre la mortalidad producida en un centro en el cual los peces recibieron 2 tratamientos distintos en agua dulce y su interacción que pueda originarse entre ambos tratamientos. 
 
-## Inspección datos
-El set de datos se compone de un data frame conformado por 6 columnas y 6.711 observaciones. De los cuales, 2 columnas corresponden a los tratamientos a analizar, identificados como Tratamiento y Vacuna.
+

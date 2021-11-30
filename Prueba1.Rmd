@@ -51,8 +51,10 @@ datos$unidad<-as.factor(datos$unidad)
 datos$densidad<-as.factor(datos$densidad)
 ```
 
-La estructura del set de datos se compone por 5182 obvervaciones, que corresponden a los días que pasaron las unidades de cultivo en producción.
-Los datos de mortalidad se encuentran en número total y porcentaje de peces extraídos por unidad el día, los cuales cursan con signología característica de SRS y son clasificados como tal causa.
+
+La estructura del set de datos se compone por un data frame conformado por 9 columnas y 5182 obvervaciones, que corresponden a los días que pasaron las unidades de cultivo en producción. Dentro del data frame se encuentran 2 columnas que corresponden a los tratamientos a analizar, identificados como Tratamiento y Vacuna, además de otras variables tales como Piscicultura de origen (origen), clase de los peces (clase) y densidad.
+
+Los datos de mortalidad se encuentran registrados como número total y porcentaje de peces extraídos por unidad en el día, los cuales evidencian signología característica de SRS y son clasificados como tal causa.
 
 
 ```{r}
